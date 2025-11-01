@@ -158,6 +158,12 @@
             attempts++;
             document.getElementById('attempts').textContent = attempts;
             
+            // Отправляем статистику на сервер
+            fetch('/api/attempt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            }).catch(err => console.log('Ошибка отправки статистики:', err));
+            
             button.classList.add('running');
             
             // Получаем размеры окна
@@ -219,6 +225,13 @@
         function handleYes() {
             const container = document.querySelector('.container');
             const emoji = document.querySelector('.emoji');
+            
+            // Отправляем статистику победы
+            fetch('/api/win', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({attempts: attempts})
+            }).catch(err => console.log('Ошибка отправки статистики:', err));
             
             container.classList.add('success');
             emoji.textContent = '🎉';
