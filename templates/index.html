@@ -166,28 +166,46 @@
             
             button.classList.add('running');
             
-            // Получаем размеры окна
-            const maxX = window.innerWidth - button.offsetWidth - 40;
-            const maxY = window.innerHeight - button.offsetHeight - 40;
-            
-            // Генерируем случайные координаты
-            let newX = Math.random() * maxX;
-            let newY = Math.random() * maxY;
-            
-            // Убедимся, что кнопка не слишком близко к курсору
+            // Получаем размеры кнопки и окна
             const rect = button.getBoundingClientRect();
-            const cursorX = event.clientX || (event.touches && event.touches[0].clientX) || 0;
-            const cursorY = event.clientY || (event.touches && event.touches[0].clientY) || 0;
+            const buttonWidth = rect.width;
+            const buttonHeight = rect.height;
             
-            const distance = Math.sqrt(
-                Math.pow(newX - cursorX, 2) + Math.pow(newY - cursorY, 2)
-            );
+            // Отступы от краев экрана (чтобы кнопка не улетала за край)
+            const margin = 20;
+            const minX = margin;
+            const minY = margin;
+            const maxX = window.innerWidth - buttonWidth - margin;
+            const maxY = window.innerHeight - buttonHeight - margin;
             
-            if (distance < 200) {
-                // Если слишком близко, перемещаем в противоположную сторону
-                newX = cursorX > maxX / 2 ? Math.random() * (maxX / 2) : maxX / 2 + Math.random() * (maxX / 2);
-                newY = cursorY > maxY / 2 ? Math.random() * (maxY / 2) : maxY / 2 + Math.random() * (maxY / 2);
-            }
+            // Позиция курсора
+            const cursorX = event.clientX || (event.touches && event.touches[0].clientX) || window.innerWidth / 2;
+            const cursorY = event.clientY || (event.touches && event.touches[0].clientY) || window.innerHeight / 2;
+            
+            // Генерируем случайные координаты в пределах экрана
+            let newX, newY;
+            let attempts_calc = 0;
+            
+            do {
+                newX = minX + Math.random() * (maxX - minX);
+                newY = minY + Math.random() * (maxY - minY);
+                
+                // Расстояние от курсора до новой позиции
+                const distance = Math.sqrt(
+                    Math.pow(newX - cursorX, 2) + Math.pow(newY - cursorY, 2)
+                );
+                
+                // Если достаточно далеко от курсора (минимум 150px), используем эту позицию
+                if (distance > 150) {
+                    break;
+                }
+                
+                attempts_calc++;
+            } while (attempts_calc < 10); // Максимум 10 попыток найти хорошую позицию
+            
+            // Финальная проверка границ (на всякий случай)
+            newX = Math.max(minX, Math.min(maxX, newX));
+            newY = Math.max(minY, Math.min(maxY, newY));
             
             // Применяем позиционирование относительно viewport
             button.style.position = 'fixed';
